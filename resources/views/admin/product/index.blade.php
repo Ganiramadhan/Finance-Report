@@ -2,21 +2,30 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Produk</h1>
+        <h1><i class="fas fa-cube" style="font-size: 1em;"></i> Data Produk</h1>
     </div>
 
+
     <div class="row">
-        <div class="col-6">
+        <div class="col-4">
             <div class="search-element">
                 <input class="form-control" placeholder="Cari Produk" aria-label="Search" data-width="250" name="search"
                     id="search">
             </div>
         </div>
-        <div class="col-6 text-right">
+        <div class="col-4">
+            <h5 class="mb-0"></h5>
+
+        </div>
+        <div class="col-4 text-right">
             <h5 class="mb-0"></h5>
             <a href="{{ route('product.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Produk
             </a>
+            <a href="/product/cetak_pdf" class="btn btn-primary">
+                <i class="fas fa-print"></i> Cetak Produk
+            </a>
+
         </div>
     </div>
 
@@ -39,36 +48,46 @@
             <tbody id="product-list">
                 @forelse ($products as $product)
                     <tr>
-                        <td class="align-middle">{{ $product->id }}</td>
+                        <td class="align-middle">{{ $loop->iteration }}</td>
                         <td class="align-middle">{{ $product->nama }}</td>
                         <td class="align-middle">{{ 'Rp ' . number_format($product->hrg_beli, 0, ',', '.') }}</td>
                         <td class="align-middle">{{ $product->qty }}</td>
                         <td class="align-middle">{{ 'Rp ' . number_format($product->total, 0, ',', '.') }}</td>
                         <td class="align-middle">{{ 'Rp ' . number_format($product->harga_jual, 0, ',', '.') }}</td>
                         <td class="align-middle">{{ $product->satuan }}</td>
+
                         <td class="align-middle">
                             <div class="btn-group" role="group" aria-label="Basic example">
-                                <a href="{{ route('product.show', $product->id) }}" class="btn btn-secondary">
-                                    <i class="fas fa-info-circle"></i>
-                                </a>
-                                <a href="{{ route('product.edit', $product->id) }}" class="btn btn-success">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('product.destroy', $product->id) }}" method="POST"
-                                    class="btn btn-danger p-0"
-                                    onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger m-0">
-                                        <i class="fas fa-trash"></i>
+                                <div class="btn-group" role="group">
+                                    <button id="btnActionsDropdown" type="button" class="btn btn-primary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-cog"></i>
                                     </button>
-                                </form>
+                                    <div class="dropdown-menu" aria-labelledby="btnActionsDropdown">
+                                        <a class="dropdown-item" href="{{ route('product.show', $product->id) }}">
+                                            <i class="fas fa-info-circle fa-lg"></i> Detail
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('product.edit', $product->id) }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm" action="{{ route('product.destroy', $product->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item delete-button">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </td>
+
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">Tidak ada produk yang ditemukan.</td>
+                        <td colspan="12" class="text-center">Tidak ada produk yang ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -117,6 +136,7 @@
                     }
                 });
             });
+
 
             $(document).on('click', '.pagination a', function(event) {
                 event.preventDefault();

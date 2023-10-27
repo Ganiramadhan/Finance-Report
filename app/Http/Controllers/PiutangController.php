@@ -6,12 +6,28 @@ use App\Models\Customer;
 use App\Models\MetodePembayaran;
 use App\Models\Piutang;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class PiutangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    public function cetak_pdf(Request $request)
+    {
+        $data_piutang = Piutang::all();
+
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Ambil data penjualan berdasarkan tanggal
+        $data_piutang = Piutang::whereBetween('tanggal', [$start_date, $end_date])->get();
+        $pdf = PDF::loadView('admin.piutang.cetak_pdf', ['data_piutang' => $data_piutang])        // Menggunakan compact() untuk mengirim data ke view
+            ->setPaper('a3', 'landscape'); // Mengatur ukuran kertas menjadi "A3" dan orientasi menjadi landscape
+        return $pdf->download('piutang_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
     public function index()
     {
         $piutangs = Piutang::orderBy('id', 'DESC')->paginate(10);
@@ -49,9 +65,7 @@ class PiutangController extends Controller
                     $output .= '<td class="align-middle">' . $row->tanggal . '</td>';
                     $output .= '<td class="align-middle">';
                     $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('piutang.edit', $row->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
-                    $output .= '</a>';
+
                     $output .= '<form action="' . route('piutang.destroy', $row->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Apakah anda ingin menghapus data ini?\')">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');

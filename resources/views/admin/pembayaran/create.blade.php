@@ -1,28 +1,18 @@
 @extends('layouts.admin.app', ['title' => 'Tambah Pembayaran'])
 
 @section('content')
+    <style>
+        .ajs-modal.ajs-error-background {
+            color: red;
+            font-size: 15px;
+            font-style: italic
+        }
+    </style>
     <div class="section-header">
         <h1> Tambah Pembayaran</h1>
     </div>
     <hr />
-    {{-- 
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
 
-    @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif --}}
-
-    @if ($errors->has('kd_pembayaran'))
-        <div class="alert alert-danger">
-            Kode Pembayaran sudah digunakan.
-        </div>
-    @endif
 
     <form action="{{ route('pembayaran.store') }}" method="POST">
         @csrf
@@ -31,6 +21,26 @@
                 <input type="text" name="kd_pembayaran" id="kd_pembayaran" class="form-control" placeholder="Kode Pembayaran"
                     required value="{{ old('kd_pembayaran') }}">
             </div>
+
+            @if ($errors->has('kd_pembayaran'))
+                <script>
+                    $(document).ready(function() {
+                        // Cek apakah ada pesan kesalahan dalam variabel JavaScript
+                        var errorMessage = "Kode Pembayaran sudah digunakan.";
+
+                        if (errorMessage) {
+                            // Tampilkan pesan kesalahan menggunakan Alertify
+                            alertify.alert('Error', errorMessage).setHeader('Validation Error').set('basic', true).set('modal',
+                                true);
+                            // Menambahkan kelas CSS untuk warna merah pada pesan Alertify
+                            $(".ajs-header").addClass("ajs-error-background"),
+                                $(".ajs-modal").addClass("ajs-error-background");
+
+                        }
+                    });
+                </script>
+            @endif
+
             <div class="col">
                 <div class="form-group">
                     <select class="form-control" id="kategori_pengeluaran_id" name="kategori_pengeluaran_id" required>

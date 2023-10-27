@@ -7,11 +7,13 @@
     <hr />
     {{-- @if (session('error'))
         <div class="alert alert-danger">
+
             {{ session('error') }}
         </div>
     @endif --}}
 
-    <form action="{{ route('penjualan.store') }}" method="POST">
+
+    <form action="/user/penjualan/store" method="POST">
         @csrf
 
         <div class="row mb-3">

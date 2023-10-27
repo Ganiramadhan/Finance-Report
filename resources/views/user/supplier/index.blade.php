@@ -2,8 +2,10 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Supplier</h1>
+        <h1><i class="fas fa-truck" style="font-size: 1em;"></i> Data Supplier</h1>
     </div>
+
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -25,7 +27,7 @@
         <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead class="table-primary">
                 <tr>
-                    <th>#</th>
+                    <th>Nomor</th>
                     <th>Nama</th>
                     <th>Sisa Utang</th>
                     <th>Nomor Telepon</th>
@@ -36,7 +38,7 @@
                 @if ($suppliers->count() > 0)
                     @foreach ($suppliers as $supplier)
                         <tr>
-                            <td class="align-middle">{{ $supplier->id }}</td>
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $supplier->nama }}</td>
                             <td class="align-middle">{{ 'Rp ' . number_format($supplier->saldo_awal_utang, 0, ',', '.') }}
                             </td>
@@ -82,7 +84,7 @@
             $('#search').on('keyup', function() {
                 var query = $(this).val();
                 $.ajax({
-                    url: "{{ route('supplier.search') }}",
+                    url: "{{ route('supplier.search_user') }}",
                     type: "GET",
                     data: {
                         'query': query,
@@ -107,7 +109,7 @@
                 $('.pagination li').removeClass('active');
                 $(this).closest('li').addClass('active');
                 $.ajax({
-                    url: "{{ route('supplier.search') }}",
+                    url: "{{ route('supplier.search_user') }}",
                     type: "GET",
                     data: {
                         'query': $('#search').val(),

@@ -10,9 +10,14 @@
         @method('PUT')
         <div class="row">
             <div class="col mb-3">
-                <label class="form-label">Metode Pembayaran</label>
+                <label class="form-label">Rekening</label>
                 <input type="text" name="metode_pembayaran" class="form-control" placeholder="Metode Pembayaran"
                     value="{{ $metode_pembayaran->metode_pembayaran }}">
+            </div>
+            <div class="col mb-3">
+                <label class="form-label">Saldo</label>
+                <input type="text" name="saldo" class="form-control" placeholder="Metode Pembayaran"
+                    value="{{ $metode_pembayaran->saldo }}">
             </div>
             <div class="row">
                 <div class="d-grid">

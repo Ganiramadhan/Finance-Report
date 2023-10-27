@@ -11,6 +11,7 @@ class MetodePembayaran extends Model
 
     protected $fillable = [
         'metode_pembayaran',
+        'saldo'
     ];
 
     public function transaksi()

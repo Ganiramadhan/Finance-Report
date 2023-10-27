@@ -1,6 +1,15 @@
 @extends('layouts.admin.app', ['title' => 'Tambah Produk'])
 
 @section('content')
+    <style>
+        /* Menambahkan warna latar belakang merah ke pesan kesalahan */
+        /* Mengubah warna latar belakang pesan kesalahan Alertify menjadi merah */
+        .ajs-modal.ajs-error-background {
+            color: red;
+            font-size: 15px;
+            font-style: italic
+        }
+    </style>
     <div class="section-header">
         <h1>Tambah Produk</h1>
     </div>
@@ -82,8 +91,10 @@
             var errorMessage = "{{ $errors->first('nama') }}";
 
             if (errorMessage) {
-                // Tampilkan pesan kesalahan menggunakan Toastr
-                toastr.error(errorMessage);
+                // Tampilkan pesan kesalahan menggunakan Alertify dengan warna merah
+                alertify.alert('Error', errorMessage).setHeader('Message').set('basic', true).set('modal', true);
+                // Menambahkan kelas CSS untuk warna merah pada latar belakang
+                $(".ajs-modal").addClass("ajs-error-background");
             }
         });
     </script>

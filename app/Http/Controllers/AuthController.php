@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Role;
+
 
 class AuthController extends Controller
 {
@@ -28,10 +27,11 @@ class AuthController extends Controller
 
             if (auth()->user()->role_id === 1) {
                 // jika user superadmin
-                return redirect()->intended('/admin')->with('success', 'Anda berhasil login');
+
+                return redirect()->intended('/admin')->with('success', 'Selamat datang ' . auth()->user()->name . ', Anda berhasil login');
             } else {
                 // jika user pegawai
-                return redirect()->intended('/admin');
+                return redirect()->intended('/user');
             }
         }
 

@@ -1,15 +1,13 @@
 @extends('layouts.admin.app', ['title' => 'Tambah Penjualan'])
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <div class="section-header">
         <h1>Tambah Penjualan</h1>
     </div>
     <hr />
-    {{-- @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif --}}
+
 
     <form action="{{ route('penjualan.store') }}" method="POST">
         @csrf
@@ -142,6 +140,12 @@
 
 
     <script>
+        console.log('Select2 initialization started');
+        $(document).ready(function() {
+            console.log('Document ready function called');
+            $('#customer_id').select2();
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
             var productSelect = document.getElementById("product_id");
             var satuanInput = document.getElementById("satuan");

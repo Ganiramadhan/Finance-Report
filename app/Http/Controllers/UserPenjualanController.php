@@ -14,11 +14,12 @@ class UserPenjualanController extends Controller
     public function index()
     {
         $penjualans = Penjualan::paginate(10);
+
         return view('user.penjualan.index', compact('penjualans'));
     }
 
 
-    public function search(Request $request)
+    public function search_user(Request $request)
     {
         if ($request->ajax()) {
             $output = '';
@@ -36,7 +37,7 @@ class UserPenjualanController extends Controller
 
             if ($penjualan->isEmpty()) {
                 $output .= '<tr>';
-                $output .= '<td class="text-center" colspan="8">Data Penjualan tidak ditemukan.</td>';
+                $output .= '<td class="text-center" colspan="12">Data Penjualan tidak ditemukan.</td>';
                 $output .= '</tr>';
             } else {
                 foreach ($penjualan as $row) {
@@ -89,7 +90,6 @@ class UserPenjualanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-
     public function store(Request $request)
     {
         $request->validate([
@@ -115,64 +115,58 @@ class UserPenjualanController extends Controller
                 return redirect()->back()->with('error', 'Produk tidak tersedia atau stok tidak mencukupi.');
             }
 
-            // Periksa apakah saldo mencukupi
-            $metodePembayaran = MetodePembayaran::find($request->input('metode_pembayaran_id'));
-            $totalBayar = $request->input('total_bayar');
+            // Menghitung total harga berdasarkan harga beli satuan dan qty
+            $totalHarga = $request->input('harga_jual') * $request->input('qty');
 
-            if ($metodePembayaran && $metodePembayaran->saldo >= $totalBayar) {
-                // Saldo mencukupi, lanjutkan dengan menyimpan data pembelian
+            // Menyimpan data pembelian baru ke dalam database
+            $penjualan = Penjualan::create([
+                'product_id' => $request->input('product_id'),
+                'harga_jual' => $request->input('harga_jual'),
+                'hrg_jual_satuan' => $request->input('harga_jual'),
+                'qty' => $request->input('qty'),
+                'total_harga' => $totalHarga,
+                'metode_pembayaran_id' => $request->input('metode_pembayaran_id'),
+                'customer_id' => $request->input('customer_id'),
+                'total_belanja' => $request->input('total_belanja'),
+                'diskon' => $request->input('diskon'),
+                'total_bayar' => $request->input('total_bayar'),
+                'pembayaran' => $request->input('pembayaran'),
+                'piutang' => $request->input('piutang'),
+                'no_faktur' => $request->input('no_faktur'),
+                'tanggal' => $request->input('tanggal'),
+                'hrg_jual' => $request->input('hrg_jual'),
+                'hrg_beli_satuan' => $request->input('hrg_beli_satuan'),
+                // Lanjutkan dengan kolom-kolom lain sesuai kebutuhan Anda
+            ]);
 
-                // Menghitung total harga berdasarkan harga beli satuan dan qty
-                $totalHarga = $request->input('harga_jual') * $request->input('qty');
-
-                // Menyimpan data pembelian baru ke dalam database
-                Penjualan::create([
-                    'product_id' => $request->input('product_id'),
-                    'harga_jual' => $request->input('harga_jual'),
-                    'hrg_jual_satuan' => $request->input('harga_jual'),
-                    'qty' => $request->input('qty'),
-                    'total_harga' => $totalHarga,
-                    'metode_pembayaran_id' => $request->input('metode_pembayaran_id'),
-                    'customer_id' => $request->input('customer_id'),
-                    'total_belanja' => $request->input('total_belanja'),
-                    'diskon' => $request->input('diskon'),
-                    'total_bayar' => $request->input('total_bayar'),
-                    'pembayaran' => $request->input('pembayaran'),
-                    'piutang' => $request->input('piutang'),
-                    'no_faktur' => $request->input('no_faktur'),
-                    'tanggal' => $request->input('tanggal'),
-                    'hrg_jual' => $request->input('hrg_jual'),
-                    'hrg_beli_satuan' => $request->input('hrg_beli_satuan'),
-                    // Lanjutkan dengan kolom-kolom lain sesuai kebutuhan Anda
+            // Memperbarui data satuan produk jika diperlukan
+            if ($product && $product->satuan !== $request->input('satuan')) {
+                $product->update([
+                    'satuan' => $request->input('satuan'),
                 ]);
-
-                // Memperbarui data satuan produk jika diperlukan
-                if ($product && $product->satuan !== $request->input('satuan')) {
-                    $product->update([
-                        'satuan' => $request->input('satuan'),
-                    ]);
-                }
-
-                // Mengurangkan stok produk
-                $product->qty -= $request->input('qty');
-                $product->save();
-
-                // Mengurangkan saldo pada metode pembayaran
-                $metodePembayaran->saldo += $totalBayar;
-                $metodePembayaran->save();
-
-                // Menambah utang pada customer
-                $customer = Customer::find($request->input('customer_id'));
-                $customer->saldo_awal_piutang = $request->input('piutang');
-                $customer->save();
-
-                return redirect()->route('penjualan.index')->with('success', 'Penjualan berhasil ditambahkan.');
-            } else {
-                // Saldo tidak mencukupi, kembalikan dengan pesan kesalahan
-                return redirect()->back()->with('error', 'Saldo pada metode pembayaran tidak mencukupi untuk penjualan ini.');
             }
+
+            // Mengurangkan stok produk
+            $product->qty -= $request->input('qty');
+            $product->save();
+
+            // Menambahkan total harga ke saldo metode pembayaran
+            $metodePembayaran = MetodePembayaran::find($request->input('metode_pembayaran_id'));
+            if ($metodePembayaran) {
+                $metodePembayaran->saldo += $totalHarga;
+                $metodePembayaran->save();
+            }
+
+            // Menambah utang pada customer
+            $customer = Customer::find($request->input('customer_id'));
+            $customer->saldo_awal_piutang = $request->input('piutang');
+            $customer->save();
+
+            return redirect('user/penjualan')->with('success', 'Data Berhasil ditambahkan.');
         });
     }
+
+
 
 
     /**
@@ -181,9 +175,8 @@ class UserPenjualanController extends Controller
     public function show(string $id)
     {
         $penjualan = Penjualan::findOrFail($id);
-        return view('user/penjualan.show', compact('penjualan'));
+        return view('user.penjualan.show', compact('penjualan'));
     }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -252,7 +245,7 @@ class UserPenjualanController extends Controller
         $product->qty += $qtyChange;
         $product->save();
 
-        return redirect()->route('penjualan.index')->with('success', 'Data Berhasil diupdate');
+        return redirect()->route('user_penjualan.index')->with('success', 'Data Berhasil diupdate');
     }
 
     /**
@@ -260,39 +253,43 @@ class UserPenjualanController extends Controller
      */
     public function destroy(string $id)
     {
+        try {
+            // Temukan penjualan yang akan dihapus
+            $penjualan = Penjualan::findOrFail($id);
 
-        // Temukan penjualan yang akan dihapus
-        $penjualan = Penjualan::findOrFail($id);
+            // Hapus penjualan
+            $penjualan->delete();
 
-        // Temukan metode pembayaran yang terkait dengan penjualan
-        $metodePembayaran = MetodePembayaran::find($penjualan->metode_pembayaran_id);
+            // Temukan metode pembayaran yang terkait dengan penjualan
+            $metodePembayaran = MetodePembayaran::find($penjualan->metode_pembayaran_id);
 
-        // Temukan customer yang terkait dengan pembelian
-        $customer = Customer::find($penjualan->customer_id);
+            // Temukan customer yang terkait dengan penjualan
+            $customer = Customer::find($penjualan->customer_id);
 
-        // Temukan produk yang terkait dengan pembelian
-        $product = Product::find($penjualan->product_id);
+            // Temukan produk yang terkait dengan penjualan
+            $product = Product::find($penjualan->product_id);
 
-        // Kembalikan saldo di metode pembayaran
-        if ($metodePembayaran) {
-            $metodePembayaran->saldo -= $penjualan->pembayaran;
-            $metodePembayaran->save();
+            if ($metodePembayaran) {
+                // Kembalikan saldo di metode pembayaran
+                $metodePembayaran->saldo -= $penjualan->pembayaran;
+                $metodePembayaran->save();
+            }
+
+            if ($customer) {
+                // Kembalikan utang di saldo utang awal tabel customer
+                $customer->saldo_awal_piutang -= $penjualan->piutang;
+                $customer->save();
+            }
+
+            if ($product) {
+                // Kembalikan jumlah produk ke tabel products
+                $product->qty += $penjualan->qty;
+                $product->save();
+            }
+
+            return redirect('/user/penjualan')->with('success', 'Data Berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect('/user/penjualan')->with('error', 'Gagal menghapus data. Error: ' . $e->getMessage());
         }
-
-        // Kembalikan utang di saldo utang awal tabel customer
-        if ($customer) {
-            $customer->saldo_awal_piutang -= $penjualan->piutang;
-            $customer->save();
-        }
-
-        // Kembalikan jumlah produk ke tabel products
-        if ($product) {
-            $product->qty += $penjualan->qty;
-            $product->save();
-        }
-        // Hapus penjualan
-        $penjualan->delete();
-
-        return redirect()->route('penjualan.index')->with('success', 'Data Berhasil dihapus');
     }
 }

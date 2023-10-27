@@ -2,8 +2,9 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Piutang</h1>
+        <h1><i class="fas fa-coins" style="font-size: 1em;"></i> Data Piutang</h1>
     </div>
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -26,7 +27,7 @@
         <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead class="table-primary">
                 <tr>
-                    {{-- <th>Nomor</th> --}}
+                    <th>Nomor</th>
                     <th>Nama Customer</th>
                     <th>Jumlah Piutang</th>
                     <th>Pembayaran</th>
@@ -40,7 +41,7 @@
                 @if ($piutangs->count() > 0)
                     @foreach ($piutangs as $row)
                         <tr>
-                            {{-- <td class="align-middle">{{ $row->id }}</td> --}}
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $row->customer->nama }}</td>
                             <td class="align-middle">
                                 {{ 'Rp ' . number_format($row->jumlah_piutang, 0, ',', '.') }}</td>
@@ -89,7 +90,7 @@
             $('#search').on('keyup', function() {
                 var query = $(this).val();
                 $.ajax({
-                    url: "{{ route('piutang.search') }}",
+                    url: "{{ route('piutang.search_user') }}",
                     type: "GET",
                     data: {
                         'query': query,
@@ -114,7 +115,7 @@
                 $('.pagination li').removeClass('active');
                 $(this).closest('li').addClass('active');
                 $.ajax({
-                    url: "{{ route('piutang.search') }}",
+                    url: "{{ route('piutang.search_user') }}",
                     type: "GET",
                     data: {
                         'query': $('#search').val(),

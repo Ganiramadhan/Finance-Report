@@ -7,6 +7,7 @@ use App\Models\MetodePembayaran;
 use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class PembayaranController extends Controller
@@ -14,6 +15,22 @@ class PembayaranController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function cetak_pdf(Request $request)
+    {
+        $data_pembayaran = Pembayaran::all();
+
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Ambil data penjualan berdasarkan tanggal
+        $data_pembayaran = Pembayaran::whereBetween('tanggal', [$start_date, $end_date])->get();
+        $pdf = PDF::loadView('admin.pembayaran.cetak_pdf', ['data_pembayaran' => $data_pembayaran])        // Menggunakan compact() untuk mengirim data ke view
+            ->setPaper('a3', 'landscape'); // Mengatur ukuran kertas menjadi "A3" dan orientasi menjadi landscape
+        return $pdf->download('pembayaran_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
+
+
     public function index()
     {
         $pembayarans = Pembayaran::paginate(10);
@@ -48,20 +65,25 @@ class PembayaranController extends Controller
                     $output .= '<td class="align-middle">' . $bayar->metode_pembayaran->metode_pembayaran . '</td>';
                     $output .= '<td class="align-middle">' . $bayar->tanggal . '</td>';
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('pembayaran.show', $bayar->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('pembayaran.show', $bayar->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('pembayaran.edit', $bayar->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
+                    $output .= '<a class="dropdown-item" href="' . route('pembayaran.edit', $bayar->id) . '">';
+                    $output .= '<i class="fas fa-edit"></i> Edit';
                     $output .= '</a>';
-                    $output .= '<form action="' . route('pembayaran.destroy', $bayar->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Apakah anda ingin menghapus data ini?\')">';
+                    $output .= '<form action="' . route('pembayaran.destroy', $bayar->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
+                    $output .= '</div>';
                     $output .= '</div>';
                     $output .= '</td>';
                     $output .= '</tr>';

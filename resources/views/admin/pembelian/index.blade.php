@@ -2,8 +2,9 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Pembelian</h1>
+        <h1><i class="fas fa-shopping-bag" style="font-size: 1em;"></i> Data Pembelian</h1>
     </div>
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -16,6 +17,9 @@
             <a href="{{ route('pembelian.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Pembelian
             </a>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
+                <i class="fas fa-print"></i> Cetak Pembelian
+            </button>
         </div>
     </div>
 
@@ -52,7 +56,7 @@
                 @if ($pembelians->count() > 0)
                     @foreach ($pembelians as $row)
                         <tr>
-                            <td class="align-middle">{{ $row->id }}</td>
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $row->kd_transaksi }}</td>
                             <td class="align-middle">{{ $row->product->nama }}</td>
                             {{-- <td class="align-middle">{{ 'Rp ' . number_format($row->hrg_beli_satuan, 0, ',', '.') }}</td> --}}
@@ -71,22 +75,30 @@
 
                             <td class="align-middle">
                                 <div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="{{ route('pembelian.show', $row->id) }}" type="button"
-                                        class="btn btn-secondary">
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                    {{-- <a href="{{ route('pembelian.edit', $row->id) }}" type="button" class="btn btn-success">
-                                    <i class="fas fa-edit"></i>
-                                </a> --}}
-                                    <form action="{{ route('pembelian.destroy', $row->id) }}" method="POST"
-                                        class="btn btn-danger p-0"
-                                        onsubmit="return confirm('Apakah anda ingin menghapus data ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger m-0">
-                                            <i class="fas fa-trash"></i>
+                                    <div class="btn-group" role="group">
+                                        <button id="btnActionsDropdown" type="button"
+                                            class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-cog"></i>
                                         </button>
-                                    </form>
+                                        <div class="dropdown-menu" aria-labelledby="btnActionsDropdown">
+                                            <a class="dropdown-item" href="{{ route('pembelian.show', $row->id) }}">
+                                                <i class="fas fa-info-circle fa-lg"></i> Detail
+                                            </a>
+                                            {{-- <a class="dropdown-item" href="{{ route('pembelian.edit', $row->id) }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a> --}}
+                                            <form id="deleteForm" action="{{ route('pembelian.destroy', $row->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item delete-button">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -177,3 +189,31 @@
         });
     </script>
 @endsection
+
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Cetak pembelian</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('pembelian.cetak_pdf') }}" method="get">
+                    @csrf
+                    <div class="form-group">
+                        <label for="start_date">Tanggal Mulai:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">Tanggal Selesai:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cetak PDF</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

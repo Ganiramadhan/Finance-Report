@@ -2,8 +2,10 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Produk</h1>
+        <h1><i class="fas fa-cube" style="font-size: 1em;"></i> Data Produk</h1>
     </div>
+
+
 
     <div class="row">
         <div class="col-6">
@@ -39,7 +41,7 @@
             <tbody id="product-list">
                 @forelse ($products as $product)
                     <tr>
-                        <td class="align-middle">{{ $product->id }}</td>
+                        <td class="align-middle">{{ $loop->iteration }}</td>
                         <td class="align-middle">{{ $product->nama }}</td>
                         <td class="align-middle">{{ 'Rp ' . number_format($product->hrg_beli, 0, ',', '.') }}</td>
                         <td class="align-middle">{{ $product->qty }}</td>
@@ -103,7 +105,7 @@
             $('#search').on('keyup', function() {
                 var query = $(this).val();
                 $.ajax({
-                    url: "{{ route('product.search') }}",
+                    url: "{{ route('product.search_user') }}",
                     type: "GET",
                     data: {
                         'query': query,
@@ -128,7 +130,7 @@
                 $('.pagination li').removeClass('active');
                 $(this).closest('li').addClass('active');
                 $.ajax({
-                    url: "{{ route('product.search') }}",
+                    url: "{{ route('product.search_user') }}",
                     type: "GET",
                     data: {
                         'query': $('#search').val(),

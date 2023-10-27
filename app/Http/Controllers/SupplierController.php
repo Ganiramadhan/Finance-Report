@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SupplierController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    public function cetak_pdf()
+    {
+        $data_supplier = Supplier::all();
+        $pdf = PDF::loadView('admin.supplier.cetak_pdf', ['data_supplier' => $data_supplier]); // Menggunakan compact() untuk mengirim data ke view
+        return $pdf->download('supplier_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
     public function index()
     {
         $suppliers = Supplier::paginate(10);
@@ -42,20 +50,25 @@ class SupplierController extends Controller
                     $output .= '<td class="align-middle">' . $supplier->no_telepon . '</td>';
                     $output .= '<td class="align-middle">' . $supplier->alamat . '</td>';
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('supplier.show', $supplier->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('supplier.show', $supplier->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('supplier.edit', $supplier->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
+                    $output .= '<a class="dropdown-item" href="' . route('supplier.edit', $supplier->id) . '">';
+                    $output .= '<i class="fas fa-edit"></i> Edit';
                     $output .= '</a>';
-                    $output .= '<form action="' . route('supplier.destroy', $supplier->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<form action="' . route('supplier.destroy', $supplier->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
+                    $output .= '</div>';
                     $output .= '</div>';
                     $output .= '</td>';
                     $output .= '</tr>';

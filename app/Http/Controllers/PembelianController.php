@@ -9,6 +9,8 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 
 
@@ -17,6 +19,22 @@ class PembelianController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function cetak_pdf(Request $request)
+    {
+        $data_pembelian = Pembelian::all();
+
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Ambil data penjualan berdasarkan tanggal
+        $data_pembelian = Pembelian::whereBetween('tanggal', [$start_date, $end_date])->get();
+        $pdf = PDF::loadView('admin.pembelian.cetak_pdf', ['data_pembelian' => $data_pembelian])        // Menggunakan compact() untuk mengirim data ke view
+            ->setPaper('a3', 'landscape'); // Mengatur ukuran kertas menjadi "A3" dan orientasi menjadi landscape
+        return $pdf->download('pembelian_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
+
+
     public function index()
     {
         $pembelians = Pembelian::paginate(5);
@@ -40,7 +58,7 @@ class PembelianController extends Controller
 
             if ($pembelian->isEmpty()) {
                 $output .= '<tr>';
-                $output .= '<td class="text-center" colspan="8">Data Pembelian tidak ditemukan.</td>';
+                $output .= '<td class="text-center" colspan="12">Data Pembelian tidak ditemukan.</td>';
                 $output .= '</tr>';
             } else {
                 foreach ($pembelian as $row) {
@@ -54,20 +72,22 @@ class PembelianController extends Controller
                     $output .= '<td class="align-middle">' . $row->metode_pembayaran->metode_pembayaran . '</td>';
                     $output .= '<td class="align-middle">' . $row->supplier->nama . '</td>';
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('pembelian.show', $row->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('pembelian.show', $row->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('pembelian.edit', $row->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
-                    $output .= '</a>';
-                    $output .= '<form action="' . route('pembelian.destroy', $row->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Apakah anda ingin menghapus data ini?\')">';
+                    $output .= '<form action="' . route('pembelian.destroy', $row->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
+                    $output .= '</div>';
                     $output .= '</div>';
                     $output .= '</td>';
                     $output .= '</tr>';

@@ -2,8 +2,9 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Customer</h1>
+        <h1><i class="fas fa-users" style="font-size: 1em;"></i> Data Customer</h1>
     </div>
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -16,6 +17,11 @@
             <a href="{{ route('customer.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Customer
             </a>
+            </a>
+            <a href="/customer/cetak_pdf" class="btn btn-primary">
+                <i class="fas fa-print"></i> Cetak Data
+            </a>
+
         </div>
     </div>
     <hr />
@@ -43,23 +49,30 @@
                         <td class="align-middle">{{ $customer->alamat }}</td>
                         <td class="align-middle">
                             <div class="btn-group" role="group" aria-label="Basic example">
-                                <a href="{{ route('customer.show', $customer->id) }}" type="button"
-                                    class="btn btn-secondary">
-                                    <i class="fas fa-info-circle"></i>
-                                </a>
-                                <a href="{{ route('customer.edit', $customer->id) }}" type="button"
-                                    class="btn btn-success">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('customer.destroy', $customer->id) }}" method="POST"
-                                    class="btn btn-danger p-0"
-                                    onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger m-0">
-                                        <i class="fas fa-trash"></i>
+                                <div class="btn-group" role="group">
+                                    <button id="btnActionsDropdown" type="button" class="btn btn-primary dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-cog"></i>
                                     </button>
-                                </form>
+                                    <div class="dropdown-menu" aria-labelledby="btnActionsDropdown">
+                                        <a class="dropdown-item" href="{{ route('customer.show', $customer->id) }}">
+                                            <i class="fas fa-info-circle fa-lg"></i> Detail
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('customer.edit', $customer->id) }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm" action="{{ route('customer.destroy', $customer->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item delete-button">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>

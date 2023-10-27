@@ -16,7 +16,7 @@ class UserPiutangController extends Controller
         return view('user.piutang.index', compact('piutangs'));
     }
 
-    public function search(Request $request)
+    public function search_user(Request $request)
     {
         if ($request->ajax()) {
             $query = $request->get('query');

@@ -8,6 +8,8 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 
 
@@ -16,10 +18,39 @@ class TransaksiController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function cetak_pdf(Request $request)
+    {
+        $data_transaksi = Transaksi::all();
+
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Ambil data penjualan berdasarkan tanggal
+        $data_transaksi = Transaksi::whereBetween('tanggal', [$start_date, $end_date])->get();
+        $pdf = PDF::loadView('admin.transaksi.cetak_pdf', ['data_transaksi' => $data_transaksi])        // Menggunakan compact() untuk mengirim data ke view
+            ->setPaper('a3', 'landscape'); // Mengatur ukuran kertas menjadi "A3" dan orientasi menjadi landscape
+        return $pdf->download('transaksi_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
+    public function filterTransaksi(Request $request)
+    {
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        $transaksis = Transaksi::whereBetween('tanggal', [$start_date, $end_date])->get();
+
+        return view('transaksi.index', compact('transaksis'));
+    }
+
+
+
+
     public function index()
     {
+        $jenisTransaksi = JenisTransaksi::all(); // Ambil semua data jenis transaksi
+
         $transaksis = Transaksi::paginate(10);
-        return view('admin.transaksi.index', compact('transaksis'));
+        return view('admin.transaksi.index', compact('transaksis', 'jenisTransaksi'));
     }
 
     public function search(Request $request)
@@ -50,20 +81,25 @@ class TransaksiController extends Controller
                     $output .= '<td class="align-middle">' . 'Rp ' . number_format($trx->jumlah, 0, ',', '.') . '</td>';
                     $output .= '<td class="align-middle">' . $trx->tanggal . '</td>';
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('transaksi.show', $trx->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('transaksi.show', $trx->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('transaksi.edit', $trx->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
+                    $output .= '<a class="dropdown-item" href="' . route('transaksi.edit', $trx->id) . '">';
+                    $output .= '<i class="fas fa-edit"></i> Edit';
                     $output .= '</a>';
-                    $output .= '<form action="' . route('transaksi.destroy', $trx->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Apakah anda ingin menghapus data ini?\')">';
+                    $output .= '<form action="' . route('transaksi.destroy', $trx->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
+                    $output .= '</div>';
                     $output .= '</div>';
                     $output .= '</td>';
                     $output .= '</tr>';
@@ -103,19 +139,28 @@ class TransaksiController extends Controller
             'kd_transaksi.unique' => 'Kode transaksi sudah digunakan.', // Pesan error kustom
         ]);
 
-        // Mengecek apakah saldo mencukupi untuk melakukan pembayaran
         $metodePembayaran = MetodePembayaran::find($request->metode_pembayaran_id);
+
         if ($metodePembayaran) {
             $saldo = $metodePembayaran->saldo;
             $jumlahTransaksi = $request->jumlah + $request->biaya_adm;
 
-            if ($saldo < $jumlahTransaksi) {
-                // Saldo tidak mencukupi
-                return redirect()->route('transaksi.create')
-                    ->withInput()
-                    ->with('error', 'Saldo tidak mencukupi untuk melakukan pembayaran ini.');
+            // Periksa jenis transaksi
+            $jenisTransaksi = JenisTransaksi::find($request->jenis_transaksi_id);
+
+            if ($jenisTransaksi) {
+                if ($jenisTransaksi->kategori === 'Pemasukan') {
+                    // Ini adalah jenis transaksi pemasukan, tidak perlu validasi saldo
+                    // Lanjutkan dengan operasi lain atau penyimpanan data
+                } elseif ($saldo < $jumlahTransaksi) {
+                    // Jenis transaksi pengeluaran dan saldo tidak mencukupi
+                    return redirect()->route('transaksi.create')
+                        ->withInput()
+                        ->with('error', 'Saldo tidak mencukupi untuk melakukan pembayaran ini.');
+                }
             }
         }
+
 
         // Jika semua validasi berhasil, simpan transaksi
         Transaksi::create($request->all());
@@ -123,13 +168,14 @@ class TransaksiController extends Controller
         // Kurangi saldo jika jenis transaksi mengurangkan saldo
         $jenisTransaksi = JenisTransaksi::find($request->jenis_transaksi_id);
         if ($jenisTransaksi && $metodePembayaran) {
-            if ($jenisTransaksi->jenis_transaksi == 'Penerimaan Piutang' || $jenisTransaksi->jenis_transaksi == 'Penerimaan Pinjaman') {
+            if ($jenisTransaksi->kategori === 'Pemasukan') {
                 $metodePembayaran->saldo += $request->jumlah;
-            } else {
+            } elseif ($jenisTransaksi->kategori === 'Pengeluaran') {
                 $metodePembayaran->saldo -= $request->jumlah;
             }
             $metodePembayaran->save();
         }
+
 
         return redirect()->route('transaksi.index')->with('success', 'Data Berhasil ditambahkan.');
     }
@@ -199,6 +245,8 @@ class TransaksiController extends Controller
             $metodePembayaranLama->save();
         }
 
+
+
         // Periksa jenis transaksi baru
         $jenisTransaksiBaru = JenisTransaksi::find($request->jenis_transaksi_id);
 
@@ -253,11 +301,13 @@ class TransaksiController extends Controller
 
         try {
             // Periksa jenis transaksi
-            if ($transaksi->jenis_transaksi->jenis_transaksi == 'Penerimaan Piutang' || $transaksi->jenis_transaksi->jenis_transaksi == 'Penerimaan Pinjaman') {
-                // Kurangi saldo jika jenis transaksi adalah penerimaan piutang atau pinjaman
+            $jenisTransaksi = $transaksi->jenis_transaksi;
+
+            if ($jenisTransaksi->kategori == 'Pemasukan') {
+                // Kurangi saldo jika jenis transaksi adalah Pemasukan
                 $saldoMetodePembayaran->saldo -= $transaksi->jumlah;
-            } else {
-                // Tambahkan saldo jika jenis transaksi selain penerimaan piutang atau pinjaman
+            } elseif ($jenisTransaksi->kategori == 'Pengeluaran') {
+                // Tambahkan saldo jika jenis transaksi adalah Pengeluaran
                 $saldoMetodePembayaran->saldo += $transaksi->jumlah;
             }
 

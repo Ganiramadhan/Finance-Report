@@ -67,7 +67,7 @@
                 <div class="form-group">
                     <label for="keterangan">Keterangan</label>
                     <input type="text" name="keterangan" id="keterangan" class="form-control" placeholder="Keterangan"
-                        required>
+                        required readonly>
                 </div>
             </div>
             <div class="col">

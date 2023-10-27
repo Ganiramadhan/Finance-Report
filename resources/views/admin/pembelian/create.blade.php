@@ -1,6 +1,13 @@
 @extends('layouts.admin.app', ['title' => 'Tambah Pembelian'])
 
 @section('content')
+    <style>
+        .ajs-modal.ajs-error-background {
+            color: red;
+            font-size: 15px;
+            font-style: italic
+        }
+    </style>
     <div class="section-header">
         <h1>Tambah Pembelian</h1>
     </div>
@@ -17,8 +24,20 @@
                         placeholder="Kode Transaksi" required value="{{ old('kd_transaksi') }}">
 
                     @error('kd_transaksi')
-                        <div class="alert alert-danger mt-2">{{ $message }}</div>
+                        <script>
+                            $(document).ready(function() {
+                                // Tampilkan pesan kesalahan menggunakan Alertify dengan warna merah
+                                alertify.alert('Error', '{{ $message }}').setHeader('Validation Error').set('basic', true).set(
+                                    'modal', true);
+                                // Menambahkan kelas CSS untuk warna merah pada pesan Alertify
+                                $(".ajs-modal").addClass("ajs-error-background");
+                                $(".ajs-header").addClass("ajs-error");
+                            });
+                        </script>
                     @enderror
+
+
+
                 </div>
 
                 <div class="mb-3">

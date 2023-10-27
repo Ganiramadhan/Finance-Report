@@ -4,9 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CustomerController extends Controller
 {
+
+    public function cetak_pdf()
+    {
+        $data_customer = Customer::all();
+        $pdf = PDF::loadView('admin.customer.cetak_pdf', ['data_customer' => $data_customer]); // Menggunakan compact() untuk mengirim data ke view
+        return $pdf->download('customer_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
 
     public function index()
     {
@@ -29,7 +37,7 @@ class CustomerController extends Controller
 
             if ($customers->isEmpty()) {
                 $output .= '<tr>';
-                $output .= '<td class="text-center" colspan="6">Customer tidak ditemukan.</td>';
+                $output .= '<td class="text-center" colspan="9">Customer tidak ditemukan.</td>';
                 $output .= '</tr>';
             } else {
                 foreach ($customers as $customer) {
@@ -40,25 +48,32 @@ class CustomerController extends Controller
                     $output .= '<td class="align-middle">' . $customer->no_telepon . '</td>';
                     $output .= '<td class="align-middle">' . $customer->alamat . '</td>';
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('customer.show', $customer->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('customer.show', $customer->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('customer.edit', $customer->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
+                    $output .= '<a class="dropdown-item" href="' . route('customer.edit', $customer->id) . '">';
+                    $output .= '<i class="fas fa-edit"></i> Edit';
                     $output .= '</a>';
-                    $output .= '<form action="' . route('customer.destroy', $customer->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<form action="' . route('customer.destroy', $customer->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
                     $output .= '</div>';
+                    $output .= '</div>';
                     $output .= '</td>';
+
                     $output .= '</tr>';
                 }
             }
+
 
             return response()->json(['data' => $output, 'pagination' => $customers->links()->toHtml()]);
         }

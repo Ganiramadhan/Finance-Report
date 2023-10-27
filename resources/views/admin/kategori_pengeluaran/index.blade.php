@@ -4,58 +4,52 @@
     <div class="section-header">
         <h1>Kategori Pengeluaran</h1>
     </div>
-    <div class="row">
-
-
-        <a href="{{ route('kategori_pengeluaran.create') }}" class="btn btn-success">
-            <i class="fas fa-plus"></i> Tambah Data
-        </a>
-
-    </div>
+    <a href="{{ route('kategori_pengeluaran.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Tambah Data
+    </a>
 
     <hr />
-    {{-- @if (Session::has('success'))
-        <div class="alert alert-success" role="alert">
-            {{ Session::get('success') }}
-        </div>
-    @endif --}}
-    <table class="table table-hover">
-        <thead class="table-primary">
-            <tr>
-                <th>#</th>
-                <th>Nama</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if ($kategori_pengeluaran->count() > 0)
-                @foreach ($kategori_pengeluaran as $row)
-                    <tr>
-                        <td class="align-middle">{{ $loop->iteration }}</td>
-                        <td class="align-middle">{{ $row->nama_kategori }}</td>
-                        <td class="align-middle">
-                            <div class="btn-group" role="group" aria-label="Basic example">
-                                <a href="{{ route('kategori_pengeluaran.edit', $row->id) }}" class="btn btn-success">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('kategori_pengeluaran.destroy', $row->id) }}" method="POST"
-                                    class="btn btn-danger p-0"
-                                    onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger m-0">
-                                        <i class="fas fa-trash"></i>
+
+    <div class="row">
+        @if ($kategori_pengeluaran->count() > 0)
+            @foreach ($kategori_pengeluaran as $row)
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">
+                                    <i class="fas fa-file-alt mr-2"></i> {{ $row->nama_kategori }}
+                                </h5>
+                                <div class="btn-group" role="group">
+                                    <button id="btnGroupDrop{{ $row->id }}" type="button"
+                                        class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                        <i class="fas fa-cogs"></i>
                                     </button>
-                                </form>
+                                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop{{ $row->id }}">
+                                        <a class="dropdown-item" href="{{ route('kategori_pengeluaran.edit', $row->id) }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form id="deleteForm" action="{{ route('kategori_pengeluaran.destroy', $row->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item delete-button">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                @endforeach
-            @else
-                <tr>
-                    <td class="text-center" colspan="5">Kategori pengeluaran not found</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="col-md-12">
+                <p class="text-center">Kategori pengeluaran not found</p>
+            </div>
+        @endif
+    </div>
 @endsection

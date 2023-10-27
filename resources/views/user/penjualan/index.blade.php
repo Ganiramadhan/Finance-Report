@@ -2,8 +2,9 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Penjualan</h1>
+        <h1><i class="fas fa-shopping-cart" style="font-size: 1em;"></i> Data Penjualan</h1>
     </div>
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -13,7 +14,7 @@
         </div>
         <div class="col-6 text-right">
             <h5 class="mb-0"></h5>
-            <a href="{{ route('penjualan.create') }}" class="btn btn-success">
+            <a href="penjualan/create" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Penjualan
             </a>
         </div>
@@ -30,7 +31,7 @@
         <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead class="table-primary">
                 <tr>
-                    <th>#</th>
+                    <th>Nomor</th>
                     <th>Customer</th>
                     <th>Jenis Produk</th>
                     {{-- <th>Harga Beli</th> --}}
@@ -53,7 +54,7 @@
                 @if ($penjualans->count() > 0)
                     @foreach ($penjualans as $row)
                         <tr>
-                            <td class="align-middle">{{ $row->id }}</td>
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $row->customer->nama }}</td>
                             <td class="align-middle">{{ $row->product->nama }}</td>
                             {{-- <td class="align-middle">{{ 'Rp ' . number_format($row->hrg_beli_satuan, 0, ',', '.') }}</td> --}}
@@ -72,29 +73,42 @@
 
                             <td class="align-middle">
                                 <div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="{{ route('penjualan.show', $row->id) }}" type="button"
-                                        class="btn btn-secondary">
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                    {{-- <a href="{{ route('penjualan.edit', $row->id) }}" type="button" class="btn btn-success">
-                                    <i class="fas fa-edit"></i> --}}
-                                    </a>
-                                    <form action="{{ route('penjualan.destroy', $row->id) }}" method="POST"
-                                        class="btn btn-danger p-0"
-                                        onsubmit="return confirm('Apakah anda ingin menghapus data ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger m-0">
-                                            <i class="fas fa-trash"></i>
+                                    <div class="btn-group" role="group">
+                                        <button id="btnActionsDropdown" type="button"
+                                            class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-cog"></i>
                                         </button>
-                                    </form>
+                                        <div class="dropdown-menu" aria-labelledby="btnActionsDropdown">
+                                            <a class="dropdown-item" href="{{ route('show', ['id' => $row->id]) }}">
+                                                <i class="fas fa-info-circle"></i> Detail
+                                            </a>
+
+
+                                            <form id="deleteForm" action="{{ route('destroy', ['id' => $row->id]) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item delete-button"
+                                                    onclick="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                            </form>
+
+                                            </form>
+
+
+
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
+
                         </tr>
                     @endforeach
                 @else
                     <tr>
-                        <td class="text-center" colspan="12">Data Penjualan tidak ditemukan</td>
+                        <td class="text-center" colspan="10">Data Penjualan tidak ditemukan</td>
                     </tr>
                 @endif
             </tbody>
@@ -128,7 +142,7 @@
             $('#search').on('keyup', function() {
                 var query = $(this).val();
                 $.ajax({
-                    url: "{{ route('penjualan.search') }}",
+                    url: "{{ route('penjualan.search_user') }}",
                     type: "GET",
                     data: {
                         'query': query,
@@ -153,7 +167,7 @@
                 $('.pagination li').removeClass('active');
                 $(this).closest('li').addClass('active');
                 $.ajax({
-                    url: "{{ route('penjualan.search') }}",
+                    url: "{{ route('penjualan.search_user') }}",
                     type: "GET",
                     data: {
                         'query': $('#search').val(),

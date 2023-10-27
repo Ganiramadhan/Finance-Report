@@ -6,12 +6,30 @@ use App\Models\MetodePembayaran;
 use App\Models\Supplier;
 use App\Models\Utang;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class UtangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    public function cetak_pdf(Request $request)
+    {
+        $data_utang = Utang::all();
+
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        // Ambil data penjualan berdasarkan tanggal
+        $data_utang = Utang::whereBetween('tanggal', [$start_date, $end_date])->get();
+        $pdf = PDF::loadView('admin.utang.cetak_pdf', ['data_utang' => $data_utang])        // Menggunakan compact() untuk mengirim data ke view
+            ->setPaper('a3', 'landscape'); // Mengatur ukuran kertas menjadi "A3" dan orientasi menjadi landscape
+        return $pdf->download('utang_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
+    }
+
+
+
     public function index()
     {
         $utangs = Utang::orderBy('id', 'DESC')->paginate(10);
@@ -52,9 +70,6 @@ class UtangController extends Controller
                     $output .= '<td class="align-middle">' . $row->tanggal . '</td>';
                     $output .= '<td class="align-middle">';
                     $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('utang.edit', $row->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
-                    $output .= '</a>';
                     $output .= '<form action="' . route('utang.destroy', $row->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Apakah anda ingin menghapus data ini?\')">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
@@ -108,9 +123,9 @@ class UtangController extends Controller
         $saldoBaruMetodePembayaran = $saldoMetodePembayaran - $pembayaran;
 
         // Pastikan saldo awal utang tidak menjadi negatif
-        if ($sisaUtang < 0) {
-            return redirect()->back()->with('error', 'Utang Sudah Lunas');
-        }
+        // if ($sisaUtang < 0) {
+        //     return redirect()->back()->with('error', 'Utang Sudah Lunas');
+        // }
 
         // Pastikan saldo metode pembayaran tidak menjadi negatif
         if ($saldoBaruMetodePembayaran < 0) {

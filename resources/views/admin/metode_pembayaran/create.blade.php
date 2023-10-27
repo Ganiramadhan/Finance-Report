@@ -9,7 +9,15 @@
         @csrf
         <div class="row mb-3">
             <div class="col">
-                <input type="text" name="metode_pembayaran" class="form-control" placeholder="Nama">
+                <label for="rekening">Rekening</label>
+                <input type="text" name="metode_pembayaran" class="form-control" placeholder="Nama" id="rekening">
+            </div>
+
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="saldo">Saldo Rekening</label>
+                <input type="text" name="saldo" class="form-control" placeholder="Saldo Rekening" id="saldo">
             </div>
 
         </div>

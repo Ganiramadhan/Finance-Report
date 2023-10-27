@@ -1,9 +1,12 @@
 @extends('layouts.admin.app', ['title' => 'Data Piutang'])
 
 @section('content')
+
     <div class="section-header">
-        <h1>Data Piutang</h1>
+        <h1><i class="fas fa-coins" style="font-size: 1em;"></i> Data Piutang</h1>
     </div>
+
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -16,6 +19,10 @@
             <a href="{{ route('piutang.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Data
             </a>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#filterModal">
+                <i class="fas fa-print"></i> Cetak Data
+            </button>
+
         </div>
     </div>
 
@@ -31,7 +38,7 @@
         <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead class="table-primary">
                 <tr>
-                    {{-- <th>Nomor</th> --}}
+                    <th>Nomor</th>
                     <th>Nama Customer</th>
                     <th>Jumlah Piutang</th>
                     <th>Pembayaran</th>
@@ -46,7 +53,7 @@
                 @if ($piutangs->count() > 0)
                     @foreach ($piutangs as $row)
                         <tr>
-                            {{-- <td class="align-middle">{{ $row->id }}</td> --}}
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $row->customer->nama }}</td>
                             <td class="align-middle">
                                 {{ 'Rp ' . number_format($row->jumlah_piutang, 0, ',', '.') }}</td>
@@ -67,12 +74,13 @@
                                     </a> --}}
                                     <form action="{{ route('piutang.destroy', $row->id) }}" method="POST"
                                         class="btn btn-danger p-0"
-                                        onsubmit="return confirm('Apakah anda ingin menghapus data ini?')">
+                                        onsubmit="return confirm('Anda yakin ingin menghapus data  ?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger m-0">
                                             <i class="fas fa-trash"></i>
                                         </button>
+
                                     </form>
                                 </div>
                             </td>
@@ -163,3 +171,32 @@
         });
     </script>
 @endsection
+
+
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Cetak Data Piutang</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('piutang.cetak_pdf') }}" method="get">
+                    @csrf
+                    <div class="form-group">
+                        <label for="start_date">Tanggal Mulai:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">Tanggal Selesai:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cetak PDF</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

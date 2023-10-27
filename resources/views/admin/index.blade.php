@@ -7,10 +7,15 @@
             @foreach ($metode_pembayaran as $row)
                 <div class="col-md-4">
                     <div class="card">
-                        <div class="card-body text-center">
-                            <h1 class="text-dark font-weight-bold" style="font-size: 24px;">{{ $row->metode_pembayaran }}</h1>
-                            <hr />
-                            <h6 class="text-muted">Rp. {{ number_format($row->saldo, 0, ',', '.') }}</h6>
+                        <div class="card-body text-center d-flex align-items-center">
+                            <i class="fas fa-credit-card fa-4x mr-3"></i> <!-- Adjust the margin-right for spacing -->
+                            <div>
+                                <h1 class="text-dark font-weight-bold" style="font-size: 24px;">{{ $row->metode_pembayaran }}
+                                </h1>
+                                <hr />
+                                <h6 class="text-muted saldo-animation" data-saldo="{{ $row->saldo }}">Rp.
+                                    {{ number_format($row->saldo, 0, ',', '.') }}</h6>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -127,6 +132,61 @@
     </div>
 
     <script>
+        function animateNumbers(targetElements, duration) {
+            targetElements.forEach(function(element) {
+                var startValue = 0;
+                var targetValue = parseFloat(element.getAttribute("data-target"));
+                var interval = 10; // Interval waktu dalam milidetik
+                var steps = duration / interval;
+                var increment = (targetValue - startValue) / steps;
+                var currentStep = 0;
+
+                function updateNumber() {
+                    startValue += increment;
+                    element.textContent = "Rp. " + startValue.toFixed(0).replace(/\d(?=(\d{3})+$)/g, "$&,");
+                    currentStep++;
+
+                    if (currentStep < steps) {
+                        requestAnimationFrame(updateNumber);
+                    } else {
+                        element.textContent = "Rp. " + targetValue.toFixed(0).replace(/\d(?=(\d{3})+$)/g, "$&,");
+                    }
+                }
+
+                requestAnimationFrame(updateNumber);
+            });
+        }
+
+        // Ambil elemen-elemen yang ingin di-animate
+        var elementsToAnimate = document.querySelectorAll(".animate-number");
+
+        // Panggil fungsi animateNumbers dengan elemen-elemen yang ingin di-animate dan durasi animasi (misalnya, 1000 ms untuk 1 detik)
+        animateNumbers(elementsToAnimate, 1000);
+        document.addEventListener('DOMContentLoaded', function() {
+            const saldoElements = document.querySelectorAll('.saldo-animation');
+            saldoElements.forEach(function(element) {
+                const saldo = parseFloat(element.dataset.saldo);
+                let currentSaldo = 0;
+                const step = saldo /
+                    100; // Ubah angka 50 sesuai dengan kecepatan bertambahnya saldo (semakin besar, semakin cepat)
+
+                function updateSaldo() {
+                    if (currentSaldo < saldo) {
+                        currentSaldo += step;
+                        element.innerText = 'Rp. ' + currentSaldo.toFixed(0).replace(/\d(?=(\d{3})+$)/g,
+                            '$&,');
+                        requestAnimationFrame(updateSaldo);
+                    } else {
+                        element.innerText = 'Rp. ' + saldo.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&,');
+                    }
+                }
+
+                updateSaldo();
+            });
+        });
+
+
+
         //CHART PENJUALAN
         var ctx = document.getElementById('chartpenjualan').getContext('2d');
 

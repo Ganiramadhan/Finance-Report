@@ -16,7 +16,7 @@ class UserCustomerController extends Controller
         return view('user.customer.index', compact('customers'));
     }
 
-    public function search(Request $request)
+    public function search_user(Request $request)
     {
         if ($request->ajax()) {
             $output = '';
@@ -31,7 +31,7 @@ class UserCustomerController extends Controller
 
             if ($customers->isEmpty()) {
                 $output .= '<tr>';
-                $output .= '<td class="text-center" colspan="6">Customer tidak ditemukan.</td>';
+                $output .= '<td class="text-center" colspan="12">Customer tidak ditemukan.</td>';
                 $output .= '</tr>';
             } else {
                 foreach ($customers as $customer) {
@@ -69,7 +69,7 @@ class UserCustomerController extends Controller
 
     public function create()
     {
-        return view('/user.customer.create');
+        return view('user.customer.create');
     }
 
     /**
@@ -80,9 +80,13 @@ class UserCustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
-        //
+        Customer::create($request->all());
+        return redirect('user/customer')->with('success', 'Data Berhasil ditambahkan.');
+
+        // return redirect()->route('customer.index')->with('success', 'Data Berhasil ditambahkan.');
     }
 
     /**
@@ -91,7 +95,7 @@ class UserCustomerController extends Controller
     public function show(string $id)
     {
         $customer = Customer::findOrFail($id);
-        return view('/admin/customer.show', compact('customer'));
+        return view('user.customer.show', compact('customer'));
     }
 
     /**
@@ -99,22 +103,31 @@ class UserCustomerController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        return view('user.customer.edit', compact('customer'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        $customer->update($request->all());
+
+        return redirect('user/customer')->with('success', 'Data Berhasil diupdate.');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+
+        $customer->delete();
+
+        return redirect('/user/customer')->with('success', 'Data Customer Berhasil dihapus');
     }
 }

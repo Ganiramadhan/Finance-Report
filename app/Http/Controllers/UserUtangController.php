@@ -17,7 +17,7 @@ class UserUtangController extends Controller
     }
 
 
-    public function search(Request $request)
+    public function search_user(Request $request)
     {
         if ($request->ajax()) {
             $output = '';

@@ -16,7 +16,7 @@ class UserSupplierController extends Controller
         return view('user.supplier.index', compact('suppliers'));
     }
 
-    public function search(Request $request)
+    public function search_user(Request $request)
     {
         if ($request->ajax()) {
             $output = '';

@@ -17,6 +17,16 @@
                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                 @enderror
             </div>
+            <div class="col mb-3">
+                <label class="form-label">Jenis Transaksi</label>
+                <select name="kategori" class="form-control">
+                    <option value="Pemasukan" {{ $jenis_transaksi->kategori === 'Pemasukan' ? 'selected' : '' }}>
+                        Pemasukan</option>
+                    <option value="Pengeluaran" {{ $jenis_transaksi->kategori === 'Pengeluaran' ? 'selected' : '' }}>
+                        Pengeluaran</option>
+                </select>
+            </div>
+
         </div>
         <div class="row">
             <div class="d-grid">

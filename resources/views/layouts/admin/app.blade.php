@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>{{ $title }}</title>
+    <link rel="icon" href="{{ asset('icon.ico') }}" type="image/x-icon">
+
 
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -34,6 +36,9 @@
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs/build/alertify.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs/build/css/alertify.min.css" />
 
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 
 
@@ -121,19 +126,16 @@
         });
 
 
-        // Saat dokumen telah dimuat
         document.addEventListener('DOMContentLoaded', function() {
             var productSelect = document.getElementById('product_id');
             var hargaInput = document.getElementById('hrg_jual');
 
-            // Fungsi untuk mengatur harga berdasarkan pilihan produk
             function setHarga() {
                 var selectedOption = productSelect.options[productSelect.selectedIndex];
                 var harga = selectedOption.getAttribute('data-hrg-jual');
                 hargaInput.value = harga;
             }
 
-            // Panggil fungsi setHarga saat dokumen dimuat dan saat pilihan produk berubah
             setHarga();
             productSelect.addEventListener('change', setHarga);
         });
@@ -200,31 +202,40 @@
             });
         });
 
-        toastr.options = {
-            "closeButton": false,
-            "debug": false,
-            "newestOnTop": false,
-            "progressBar": false,
-            "positionClass": "toast-top-right",
-            "preventDuplicates": false,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "5000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        }
+        // toastr.options = {
+        //     "closeButton": false,
+        //     "debug": false,
+        //     "newestOnTop": false,
+        //     "progressBar": false,
+        //     "positionClass": "toast-top-right",
+        //     "preventDuplicates": false,
+        //     "onclick": null,
+        //     "showDuration": "300",
+        //     "hideDuration": "1000",
+        //     "timeOut": "5000",
+        //     "extendedTimeOut": "1000",
+        //     "showEasing": "swing",
+        //     "hideEasing": "linear",
+        //     "showMethod": "fadeIn",
+        //     "hideMethod": "fadeOut"
+        // }
 
         $(document).ready(function() {
             // Cek apakah ada pesan sukses dalam variabel JavaScript
             var successMessage = "{{ Session::get('success') }}";
 
             if (successMessage) {
-                // Tampilkan pesan sukses menggunakan Toastr
-                toastr.success(successMessage);
+
+                $(document).ready(function() {
+                    // Check if there is a success message in the JavaScript variable
+                    var successMessage = "{{ Session::get('success') }}";
+
+                    if (successMessage) {
+                        // Display the success message using Alertify
+                        alertify.alert('Success', successMessage, function() {}).setHeader('Pesan');
+                    }
+                });
+
             }
         });
 
@@ -233,8 +244,9 @@
             var errorMessage = "{{ Session::get('error') }}";
 
             if (errorMessage) {
-                // Tampilkan pesan kesalahan menggunakan Toastr
-                toastr.error(errorMessage);
+                alertify.alert('Success', errorMessage, function() {
+
+                }).setHeader('Pesan');
             }
         });
     </script>

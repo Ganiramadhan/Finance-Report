@@ -1,6 +1,6 @@
 <div class="main-sidebar">
     <aside id="sidebar-wrapper">
-        <div class="sidebar-brand">
+        <div class="sidebar-brand mt-2">
             <img src="../../../img/mki.png" alt="icon" class="loading-icon" width="50" height="50"> <a
                 href="#">Laporan Keuangan</a>
         </div>
@@ -8,7 +8,6 @@
             <img src="../../../img/mki.png" alt="icon" class="loading-icon" width="50" height="50">
         </div>
         <ul class="sidebar-menu">
-
             <li class="nav-item ">
                 <a href="/admin" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
 
@@ -44,6 +43,7 @@
                     <li> <a class="nav-link" href="{{ route('transaksi.index') }}"><i class="fas fa-exchange-alt"></i>
                             Transaksi Lainnya</a>
                     </li>
+
                 </ul>
             </li>
 
@@ -70,6 +70,11 @@
                     </li>
                     <li> <a class="nav-link" href="{{ route('kategori_pengeluaran.index') }}"><i
                                 class="fas fa-money-bill-wave"></i> Jenis Pengeluaran</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="{{ route('pengguna.index') }}">
+                            <i class="fas fa-users"></i> Akun Pengguna <!-- Ganti ikon dengan fas fa-user -->
+                        </a>
                     </li>
                 </ul>
             </li>

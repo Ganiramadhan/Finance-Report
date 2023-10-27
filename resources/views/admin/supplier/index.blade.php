@@ -2,8 +2,9 @@
 
 @section('content')
     <div class="section-header">
-        <h1>Data Supplier</h1>
+        <h1><i class="fas fa-truck" style="font-size: 1em;"></i> Data Supplier</h1>
     </div>
+
     <div class="row">
         <div class="col-6">
             <div class="search-element">
@@ -16,6 +17,9 @@
             <a href="{{ route('supplier.create') }}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Tambah Supplier
             </a>
+            <a href="/supplier/cetak_pdf" class="btn btn-primary">
+                <i class="fas fa-print"></i> Cetak Data
+            </a>
         </div>
     </div>
 
@@ -25,7 +29,7 @@
         <table id="example" class="table table-striped table-bordered" style="width:100%">
             <thead class="table-primary">
                 <tr>
-                    <th>#</th>
+                    <th>Nomor</th>
                     <th>Nama</th>
                     <th>Sisa Utang</th>
                     <th>Nomor Telepon</th>
@@ -37,7 +41,7 @@
                 @if ($suppliers->count() > 0)
                     @foreach ($suppliers as $supplier)
                         <tr>
-                            <td class="align-middle">{{ $supplier->id }}</td>
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                             <td class="align-middle">{{ $supplier->nama }}</td>
                             <td class="align-middle">{{ 'Rp ' . number_format($supplier->saldo_awal_utang, 0, ',', '.') }}
                             </td>
@@ -45,24 +49,30 @@
                             <td class="align-middle">{{ $supplier->alamat }}</td>
                             <td class="align-middle">
                                 <div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="{{ route('supplier.show', $supplier->id) }}" type="button"
-                                        class="btn btn-secondary">
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                    <a href="{{ route('supplier.edit', $supplier->id) }}" type="button"
-                                        class="btn btn-success">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('supplier.destroy', $supplier->id) }}" method="POST"
-                                        class="btn btn-danger p-0"
-                                        onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger m-0">
-                                            <i class="fas fa-trash"></i>
+                                    <div class="btn-group" role="group">
+                                        <button id="btnActionsDropdown" type="button"
+                                            class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-cog"></i>
                                         </button>
-                                    </form>
-                                </div>
+                                        <div class="dropdown-menu" aria-labelledby="btnActionsDropdown">
+                                            <a class="dropdown-item" href="{{ route('supplier.show', $supplier->id) }}">
+                                                <i class="fas fa-info-circle fa-lg"></i> Detail
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('supplier.edit', $supplier->id) }}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <form id="deleteForm" action="{{ route('supplier.destroy', $supplier->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Anda yakin ingin menghapus data ini ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item delete-button">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                             </td>
                         </tr>
                     @endforeach

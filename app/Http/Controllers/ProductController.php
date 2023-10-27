@@ -6,9 +6,7 @@ use App\Models\Product;
 use App\Models\Satuan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Barryvdh\DomPDF\PDF;
-
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -20,8 +18,6 @@ class ProductController extends Controller
 
     public function index()
     {
-
-
 
         $products = Product::paginate(10);
         return view('admin.product.index', compact('products'));
@@ -41,7 +37,7 @@ class ProductController extends Controller
 
             if ($products->isEmpty()) {
                 $output .= '<tr>';
-                $output .= '<td class="text-center" colspan="6">Produk tidak ditemukan.</td>';
+                $output .= '<td class="text-center" colspan="8">Produk tidak ditemukan.</td>';
                 $output .= '</tr>';
             } else {
                 foreach ($products as $product) {
@@ -52,24 +48,29 @@ class ProductController extends Controller
                     $output .= '<td class="align-middle">' . $product->qty . '</td>';
                     $output .= '<td class="align-middle">' . 'Rp ' . number_format($product->total, 0, ',', '.') . '</td>';
 
-                    $output .= '<td class="align-middle">' . 'Rp ' . number_format($product->hrg_jual, 0, ',', '.') . '</td>';
+                    $output .= '<td class="align-middle">' . 'Rp ' . number_format($product->harga_jual, 0, ',', '.') . '</td>';
                     $output .= '<td class="align-middle">' . $product->satuan . '</td>';
 
                     $output .= '<td class="align-middle">';
-                    $output .= '<div class="btn-group" role="group" aria-label="Basic example">';
-                    $output .= '<a href="' . route('product.show', $product->id) . '" type="button" class="btn btn-secondary">';
-                    $output .= '<i class="fas fa-info-circle"></i>';
+                    $output .= '<div class="btn-group" role="group">';
+                    $output .= '<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    $output .= '<i class="fas fa-cog"></i>';
+                    $output .= '</button>';
+                    $output .= '<div class="dropdown-menu">';
+                    $output .= '<a class="dropdown-item" href="' . route('product.show', $product->id) . '">';
+                    $output .= '<i class="fas fa-info-circle"></i> Detail';
                     $output .= '</a>';
-                    $output .= '<a href="' . route('product.edit', $product->id) . '" type="button" class="btn btn-success">';
-                    $output .= '<i class="fas fa-edit"></i>';
+                    $output .= '<a class="dropdown-item" href="' . route('product.edit', $product->id) . '">';
+                    $output .= '<i class="fas fa-edit"></i> Edit';
                     $output .= '</a>';
-                    $output .= '<form action="' . route('product.destroy', $product->id) . '" method="POST" class="btn btn-danger p-0" onsubmit="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<form action="' . route('product.destroy', $product->id) . '" method="POST">';
                     $output .= csrf_field();
                     $output .= method_field('DELETE');
-                    $output .= '<button type="submit" class="btn btn-danger m-0">';
-                    $output .= '<i class="fas fa-trash"></i>';
+                    $output .= '<button type="submit" class="dropdown-item" onclick="return confirm(\'Anda yakin ingin menghapus data ini ?\')">';
+                    $output .= '<i class="fas fa-trash"></i> Hapus';
                     $output .= '</button>';
                     $output .= '</form>';
+                    $output .= '</div>';
                     $output .= '</div>';
                     $output .= '</td>';
                     $output .= '</tr>';
@@ -79,8 +80,6 @@ class ProductController extends Controller
             return response()->json(['data' => $output, 'pagination' => $products->links()->toHtml()]);
         }
     }
-
-
 
 
     /**
@@ -106,7 +105,6 @@ class ProductController extends Controller
                 'max:255', // Sesuaikan dengan panjang maksimum nama produk di database
                 Rule::unique('products')
             ],
-            // ... tambahkan aturan validasi lainnya sesuai kebutuhan Anda
         ], [
             'nama.unique' => 'Nama produk sudah tersedia.',
         ]);
@@ -176,5 +174,14 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('product.index')->with('success', 'Data Product Berhasil dihapus');
+    }
+
+
+    //CETAK
+    public function cetak_pdf()
+    {
+        $data_products = Product::all();
+        $pdf = PDF::loadView('admin.product.cetak_pdf', ['data_products' => $data_products]); // Menggunakan compact() untuk mengirim data ke view
+        return $pdf->download('product_pdf.pdf'); // Mengubah nama file PDF yang akan diunduh
     }
 }
